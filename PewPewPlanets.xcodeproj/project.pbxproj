@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		16D072751FD3493C0065A4AC /* PlayerTrail.sks in Resources */ = {isa = PBXBuildFile; fileRef = 16D072741FD3493C0065A4AC /* PlayerTrail.sks */; };
+		16D072771FD35CC80065A4AC /* EnemyDeath.sks in Resources */ = {isa = PBXBuildFile; fileRef = 16D072761FD35CC80065A4AC /* EnemyDeath.sks */; };
 		16F6025F1FCFA70F004AFC87 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16F6025E1FCFA70F004AFC87 /* AppDelegate.swift */; };
 		16F602651FCFA70F004AFC87 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16F602641FCFA70F004AFC87 /* GameScene.swift */; };
 		16F602671FCFA70F004AFC87 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16F602661FCFA70F004AFC87 /* GameViewController.swift */; };
@@ -35,6 +37,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		16D072741FD3493C0065A4AC /* PlayerTrail.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = PlayerTrail.sks; sourceTree = "<group>"; };
+		16D072761FD35CC80065A4AC /* EnemyDeath.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = EnemyDeath.sks; sourceTree = "<group>"; };
 		16F6025B1FCFA70F004AFC87 /* PewPewPlanets.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PewPewPlanets.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		16F6025E1FCFA70F004AFC87 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		16F602641FCFA70F004AFC87 /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
@@ -106,6 +110,8 @@
 				16F6026B1FCFA70F004AFC87 /* Assets.xcassets */,
 				16F6026D1FCFA70F004AFC87 /* LaunchScreen.storyboard */,
 				16F602701FCFA70F004AFC87 /* Info.plist */,
+				16D072741FD3493C0065A4AC /* PlayerTrail.sks */,
+				16D072761FD35CC80065A4AC /* EnemyDeath.sks */,
 			);
 			path = PewPewPlanets;
 			sourceTree = "<group>";
@@ -238,6 +244,8 @@
 				16F6026A1FCFA70F004AFC87 /* Main.storyboard in Resources */,
 				16F6026C1FCFA70F004AFC87 /* Assets.xcassets in Resources */,
 				16F6026F1FCFA70F004AFC87 /* LaunchScreen.storyboard in Resources */,
+				16D072751FD3493C0065A4AC /* PlayerTrail.sks in Resources */,
+				16D072771FD35CC80065A4AC /* EnemyDeath.sks in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
