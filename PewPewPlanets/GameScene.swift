@@ -9,6 +9,7 @@
 import SpriteKit
 import GameplayKit
 
+// operator overrides should be in different class
 func + (left: CGPoint, right: CGPoint) -> CGPoint {
     return CGPoint(x: left.x + right.x, y: left.y + right.y)
 }
@@ -26,6 +27,9 @@ func / (point: CGPoint, scalar: CGFloat) -> CGPoint {
 }
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
+    // more enemy bullets
+    // slower enemy bullets
+    // add stars
     // enemy spawns: either timer or constant number of alive enemies
     // enemy bullet spawns: per-enemy timer with SKAction.run
     // enemy spawn locations: chosen to give the player movement perpendicular to all enemies
@@ -39,10 +43,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     private let enemyGravityCategory: UInt32 = 0x1 << 1
     private let playerBulletCategory: UInt32 = 0x1 << 2
     private let enemyCategory: UInt32 = 0x1 << 3
+    private let enemyBulletCategory: UInt32 = 0x1 << 4
+    
+    private let enemyName = "enemy"
+    private let enemyBulletName = "enemyBullet"
+    private let playerBulletName = "playerBullet"
+    private let starName = "star"
     
     private let playerBulletSpeed: CGFloat = 500
     private let enemyBulletSpeed: CGFloat = 200
-    
+    private let maxDistanceFromPlayer: CGFloat
     private let screenCenter: CGPoint
     
     private var playerVelocity: CGVector
@@ -55,21 +65,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 //        player.zPosition = 1
         
         self.random = GKMersenneTwisterRandomSource()
-        self.player = SKShapeNode.init(circleOfRadius: 30)
+        self.player = SKShapeNode.init(circleOfRadius: 10)
         self.playerVelocity = CGVector.zero
         self.enemies = Set([])
         self.velocityMap = [SKShapeNode: CGVector]()
         self.screenCenter = CGPoint(x: size.width/2, y: size.height/2)
+        self.maxDistanceFromPlayer = max(size.width, size.height)*1.2
         super.init(size: size)
         
         physicsWorld.contactDelegate = self
         physicsWorld.gravity = CGVector.zero
         //physicsWorld.speed = 0.5
+        backgroundColor = .black
         
         let cameraNode = SKCameraNode()
         player.position = screenCenter
         player.addChild(cameraNode)
         camera = cameraNode
+        
         
         player.fillColor = .orange
         player.strokeColor = .orange
@@ -82,7 +95,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         playerGravity.minimumRadius = 50
         player.addChild(playerGravity)
         
-        player.physicsBody = SKPhysicsBody(circleOfRadius: 30)
+        player.physicsBody = SKPhysicsBody(circleOfRadius: 10)
         //player.physicsBody?.isDynamic = false
         
         player.physicsBody?.fieldBitMask = enemyGravityCategory
@@ -91,9 +104,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         player.physicsBody?.contactTestBitMask = 0
         player.physicsBody?.collisionBitMask = 0
         
+        let playerTrailEmitter = newPlayerTrailEmitter()
+        if let playerTrail = playerTrailEmitter {
+            playerTrail.zPosition = 1
+            playerTrail.targetNode = self
+            player.addChild(playerTrail)
+        }
         //player.physicsBody?.allowsRotation = false
         //player.physicsBody?.fieldBitMask = 0
         addChild(player)
+        
+        for _ in 0...170 {
+            addStar()
+        }
+        
+        for _ in 0...5 {
+            addEnemy()
+        }
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -102,34 +129,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     override func didMove(to view: SKView) {
 //        shield.region = SKRegion(radius: 100)
 //        shield.falloff = 4
-        
-        let playerTrailEmitter = newPlayerTrailEmitter()
-        if let playerTrail = playerTrailEmitter {
-            playerTrail.zPosition = 1
-            playerTrail.targetNode = self
-            player.addChild(playerTrail)
-        }
-        
-        addEnemy()
-        
-        // Get label node from scene and store it for use later
-        self.label = self.childNode(withName: "//helloLabel") as? SKLabelNode
-        if let label = self.label {
-            label.alpha = 0.0
-            label.run(SKAction.fadeIn(withDuration: 2.0))
-        }
-        // Create shape node to use during mouse interaction
-        let w = (self.size.width + self.size.height) * 0.05
-        self.spinnyNode = SKShapeNode.init(rectOf: CGSize.init(width: w, height: w), cornerRadius: w * 0.3)
-        if let spinnyNode = self.spinnyNode {
-            spinnyNode.lineWidth = 2.5
-            spinnyNode.run(SKAction.repeatForever(SKAction.rotate(byAngle: CGFloat(Double.pi), duration: 1)))
-            spinnyNode.run(SKAction.sequence([SKAction.wait(forDuration: 0.5),
-                                              SKAction.fadeOut(withDuration: 0.5),
-                                              SKAction.removeFromParent()]))
-        }
     }
-    
+
     func didBegin(_ contact: SKPhysicsContact) {
         let enemy: SKShapeNode?
         let playerBullet: SKShapeNode?
@@ -159,15 +160,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 addChild(deadEnemyExplosion)
             }
             enemies.remove(deadEnemy)
+            addEnemy()
         }
     }
-    
     func touchDown(atPoint pos : CGPoint) {
-        
-        addEnemy()
-        
-        addEnemyBullets()
-        
         if let currentPlayerVelocity = player.physicsBody?.velocity {
             playerVelocity = currentPlayerVelocity
         }
@@ -178,7 +174,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             enemy.physicsBody?.velocity = CGVector.init(dx: 0, dy: 0)
             enemy.physicsBody?.fieldBitMask = 0
         }
-        
         var shortestDistance = CGFloat.infinity
         var closestEnemy = enemies.first
         for enemy in enemies {
@@ -190,6 +185,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         //let playerBullet = SKShapeNode.init(rect: CGRect.init(x: player.position.x, y: player.position.y, width: 10, height: 10))
         let playerBullet = SKShapeNode.init(circleOfRadius: 10)
+        playerBullet.name = playerBulletName
         playerBullet.fillColor = .orange
         playerBullet.strokeColor = .orange
         playerBullet.position = player.position
@@ -197,6 +193,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         //playerBullet.physicsBody = SKPhysicsBody(rectangleOf: CGSize.init(width: 10, height: 10))
         playerBullet.physicsBody = SKPhysicsBody(circleOfRadius: 10)
         playerBullet.physicsBody?.velocity = player.position.aimVector(point: (closestEnemy?.position)!, speed: playerBulletSpeed)
+        playerBullet.physicsBody?.linearDamping = 0
         playerBullet.physicsBody?.fieldBitMask = 0
 
         playerBullet.physicsBody?.categoryBitMask = playerBulletCategory
@@ -205,10 +202,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         //playerBullet.physicsBody?.usesPreciseCollisionDetection = true
         
         addChild(playerBullet)
-        
     }
     func addEnemy() {
         let enemy = SKShapeNode.init(circleOfRadius: 20)
+        enemy.name = enemyName
         enemy.fillColor = .yellow
         enemy.strokeColor = .yellow
         enemy.physicsBody = SKPhysicsBody(circleOfRadius: 20)
@@ -234,6 +231,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 enemy.physicsBody?.velocity = CGVector.init(dx: 0, dy: 100)
             }
         }
+        enemy.run(SKAction.repeatForever(SKAction.sequence([SKAction.wait(forDuration: 0.5),
+                                                            SKAction.run {
+                                                                self.addEnemyBullet(enemy: enemy)
+            }])))
         enemy.physicsBody?.fieldBitMask = playerGravityCategory
         
         enemy.physicsBody?.isDynamic = true
@@ -242,8 +243,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         enemy.physicsBody?.collisionBitMask = 0
         
         let enemyGravity = SKFieldNode.radialGravityField()
-        enemyGravity.strength = 0.5
-        enemyGravity.falloff = 1
+        enemyGravity.strength = 1
+        enemyGravity.falloff = 2
         enemyGravity.minimumRadius = 50
         enemyGravity.categoryBitMask = enemyGravityCategory
         
@@ -252,29 +253,49 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(enemy)
     }
     
-    func addEnemyBullets() {
-        for enemy in enemies {
-            let enemyBullet = SKShapeNode.init(rectOf: CGSize(width: 10, height: 10))
-            enemyBullet.fillColor = .red
-            enemyBullet.strokeColor = .red
-            enemyBullet.position = enemy.position
-            enemyBullet.physicsBody = SKPhysicsBody(circleOfRadius: 5)
-            enemyBullet.physicsBody?.velocity = enemy.position.aimVector(point: player.position, speed: enemyBulletSpeed)
-            enemyBullet.physicsBody?.fieldBitMask = 0
-            enemyBullet.physicsBody?.categoryBitMask = 0
-            //playerBullet.physicsBody?.contactTestBitMask = 0
-            enemyBullet.physicsBody?.collisionBitMask = 0
-            //playerBullet.physicsBody?.usesPreciseCollisionDetection = true
-            
-            addChild(enemyBullet)
+    func addEnemyBullet(enemy: SKShapeNode) {
+        let enemyBullet = SKShapeNode.init(rectOf: CGSize(width: 20, height: 10))
+        enemyBullet.name = enemyBulletName
+        enemyBullet.fillColor = .red
+        enemyBullet.strokeColor = .red
+        enemyBullet.position = enemy.position
+        enemyBullet.physicsBody = SKPhysicsBody(circleOfRadius: 5)
+        enemyBullet.physicsBody?.velocity = enemy.position.aimVector(point: player.position, speed: enemyBulletSpeed)
+        enemyBullet.zRotation = angle(vector: enemy.position.aimVector(point: player.position, speed: enemyBulletSpeed))
+        enemyBullet.physicsBody?.linearDamping = 0
+        enemyBullet.physicsBody?.fieldBitMask = 0
+        enemyBullet.physicsBody?.categoryBitMask = enemyBulletCategory
+        //playerBullet.physicsBody?.contactTestBitMask = 0
+        enemyBullet.physicsBody?.collisionBitMask = 0
+        //playerBullet.physicsBody?.usesPreciseCollisionDetection = true
+        addChild(enemyBullet)
+    }
+    func addStar() {
+        let star = SKShapeNode.init(rectOf: CGSize(width: 3, height: 3))
+        star.name = starName
+        star.fillColor = .white
+        star.strokeColor = .white
+        var x = 2*maxDistanceFromPlayer*CGFloat(random.nextUniform()) - (maxDistanceFromPlayer - size.width/2)
+        var y = 2*maxDistanceFromPlayer*CGFloat(random.nextUniform()) - (maxDistanceFromPlayer - size.height/2)
+        var pos = CGPoint(x: x, y: y)
+        while pos.distance(point: player.position) > maxDistanceFromPlayer {
+            x = 2*maxDistanceFromPlayer*CGFloat(random.nextUniform()) - (maxDistanceFromPlayer - size.width/2)
+            y = 2*maxDistanceFromPlayer*CGFloat(random.nextUniform()) - (maxDistanceFromPlayer - size.height/2)
+            pos = CGPoint(x: x, y: y)
         }
+        star.position = pos
+        addChild(star)
+    }
+    func moveStar(star: SKShapeNode) { // this does not work: stars move into camera
+        let newX = 1.9*player.position.x - star.position.x
+        let newY = 1.9*player.position.y - star.position.y
+        star.position = CGPoint(x: newX, y: newY)
     }
     func touchMoved(toPoint pos : CGPoint) {
         if let n = self.spinnyNode?.copy() as! SKShapeNode? {
             n.position = pos
             n.strokeColor = SKColor.blue
             self.addChild(n)
-            //player.position = pos
         }
     }
     
@@ -312,9 +333,31 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
+        enumerateChildNodes(withName: enemyName) { (enemy, stop) in
+            if enemy.position.distance(point: self.player.position) > self.maxDistanceFromPlayer {
+                enemy.removeFromParent()
+                self.enemies.remove(enemy as! SKShapeNode)
+                self.addEnemy()
+            }
+        }
+        enumerateChildNodes(withName: enemyBulletName) { (enemyBullet, stop) in
+            if enemyBullet.position.distance(point: self.player.position) > self.maxDistanceFromPlayer {
+                enemyBullet.removeFromParent()
+            }
+        }
+        enumerateChildNodes(withName: playerBulletName) { (playerBullet, stop) in
+            if playerBullet.position.distance(point: self.player.position) > self.maxDistanceFromPlayer {
+                playerBullet.removeFromParent()
+            }
+        }
+        enumerateChildNodes(withName: starName) { (star, stop) in
+            if star.position.distance(point: self.player.position) > self.maxDistanceFromPlayer {
+                self.moveStar(star: star as! SKShapeNode)
+            }
+        }
     }
     func angle(vector: CGVector) -> CGFloat {
-        return atan(vector.dy/vector.dx)
+        return atan2(vector.dy, vector.dx)
     }
     func newPlayerTrailEmitter() -> SKEmitterNode? {
         return SKEmitterNode(fileNamed: "PlayerTrail.sks")
@@ -324,7 +367,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
 }
 
-extension CGPoint {
+extension CGPoint { // should be in different class
     func difference(point: CGPoint) -> CGPoint {
         let dx = self.x - point.x
         let dy = self.y - point.y
