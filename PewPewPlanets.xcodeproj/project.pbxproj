@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		16BC3CD91FDB71F8007B1AB1 /* MenuScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16BC3CD81FDB71F8007B1AB1 /* MenuScene.swift */; };
 		16D072751FD3493C0065A4AC /* PlayerTrail.sks in Resources */ = {isa = PBXBuildFile; fileRef = 16D072741FD3493C0065A4AC /* PlayerTrail.sks */; };
 		16D072771FD35CC80065A4AC /* EnemyDeath.sks in Resources */ = {isa = PBXBuildFile; fileRef = 16D072761FD35CC80065A4AC /* EnemyDeath.sks */; };
 		16F6025F1FCFA70F004AFC87 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16F6025E1FCFA70F004AFC87 /* AppDelegate.swift */; };
@@ -37,6 +38,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		16BC3CD81FDB71F8007B1AB1 /* MenuScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuScene.swift; sourceTree = "<group>"; };
 		16D072741FD3493C0065A4AC /* PlayerTrail.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = PlayerTrail.sks; sourceTree = "<group>"; };
 		16D072761FD35CC80065A4AC /* EnemyDeath.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = EnemyDeath.sks; sourceTree = "<group>"; };
 		16F6025B1FCFA70F004AFC87 /* PewPewPlanets.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PewPewPlanets.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -112,6 +114,7 @@
 				16F602701FCFA70F004AFC87 /* Info.plist */,
 				16D072741FD3493C0065A4AC /* PlayerTrail.sks */,
 				16D072761FD35CC80065A4AC /* EnemyDeath.sks */,
+				16BC3CD81FDB71F8007B1AB1 /* MenuScene.swift */,
 			);
 			path = PewPewPlanets;
 			sourceTree = "<group>";
@@ -271,6 +274,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				16F602651FCFA70F004AFC87 /* GameScene.swift in Sources */,
+				16BC3CD91FDB71F8007B1AB1 /* MenuScene.swift in Sources */,
 				16F602671FCFA70F004AFC87 /* GameViewController.swift in Sources */,
 				16F6025F1FCFA70F004AFC87 /* AppDelegate.swift in Sources */,
 			);

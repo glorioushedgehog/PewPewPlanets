@@ -27,11 +27,12 @@ func / (point: CGPoint, scalar: CGFloat) -> CGPoint {
 }
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
+    // maybe get rid of player gravity?
+    // reuse enemies
+    // need to be able to tell when enemies are about to shoot
     // more enemy bullets
     // slower enemy bullets
     // add stars
-    // enemy spawns: either timer or constant number of alive enemies
-    // enemy bullet spawns: per-enemy timer with SKAction.run
     // enemy spawn locations: chosen to give the player movement perpendicular to all enemies
     private var label : SKLabelNode?
     private var spinnyNode : SKShapeNode?
@@ -44,6 +45,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     private let playerBulletCategory: UInt32 = 0x1 << 2
     private let enemyCategory: UInt32 = 0x1 << 3
     private let enemyBulletCategory: UInt32 = 0x1 << 4
+    private let playerCategory: UInt32 = 0x1 << 5
     
     private let enemyName = "enemy"
     private let enemyBulletName = "enemyBullet"
@@ -55,6 +57,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     private let maxDistanceFromPlayer: CGFloat
     private let screenCenter: CGPoint
     
+    private var playerIsVulnerable: Bool
     private var playerVelocity: CGVector
     private var velocityMap: [SKShapeNode: CGVector]
     override init(size: CGSize) {
@@ -68,6 +71,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.player = SKShapeNode.init(circleOfRadius: 10)
         self.playerVelocity = CGVector.zero
         self.enemies = Set([])
+        self.playerIsVulnerable = false
         self.velocityMap = [SKShapeNode: CGVector]()
         self.screenCenter = CGPoint(x: size.width/2, y: size.height/2)
         self.maxDistanceFromPlayer = max(size.width, size.height)*1.2
@@ -96,11 +100,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         player.addChild(playerGravity)
         
         player.physicsBody = SKPhysicsBody(circleOfRadius: 10)
-        //player.physicsBody?.isDynamic = false
         
         player.physicsBody?.fieldBitMask = enemyGravityCategory
         
-        player.physicsBody?.categoryBitMask = 0
+        player.physicsBody?.categoryBitMask = playerCategory
         player.physicsBody?.contactTestBitMask = 0
         player.physicsBody?.collisionBitMask = 0
         
@@ -130,7 +133,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 //        shield.region = SKRegion(radius: 100)
 //        shield.falloff = 4
     }
-
     func didBegin(_ contact: SKPhysicsContact) {
         let enemy: SKShapeNode?
         let playerBullet: SKShapeNode?
@@ -140,8 +142,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         } else if contact.bodyA.categoryBitMask == playerBulletCategory && contact.bodyB.categoryBitMask == enemyCategory {
             playerBullet = contact.bodyA.node as? SKShapeNode
             enemy = contact.bodyB.node as? SKShapeNode
+        } else if contact.bodyA.categoryBitMask == playerCategory && contact.bodyB.categoryBitMask == enemyBulletCategory {
+            if playerIsVulnerable {
+                endGame()
+            }
+            enemy = nil
+            playerBullet = nil
+        } else if contact.bodyA.categoryBitMask == enemyBulletCategory && contact.bodyB.categoryBitMask == playerCategory {
+            if playerIsVulnerable {
+                endGame()
+            }
+            enemy = nil
+            playerBullet = nil
         } else {
-            return
+            enemy = nil
+            playerBullet = nil
         }
         if let deadEnemy = enemy, let usedPlayerBullet = playerBullet {
             deadEnemy.removeFromParent()
@@ -164,6 +179,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     func touchDown(atPoint pos : CGPoint) {
+        for body in (player.physicsBody?.allContactedBodies())! {
+            // check if one of these is an enemy bullet, end game if it is
+        }
+        playerIsVulnerable = true
         if let currentPlayerVelocity = player.physicsBody?.velocity {
             playerVelocity = currentPlayerVelocity
         }
@@ -254,7 +273,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func addEnemyBullet(enemy: SKShapeNode) {
-        let enemyBullet = SKShapeNode.init(rectOf: CGSize(width: 20, height: 10))
+        let enemyBullet = SKShapeNode.init(rectOf: CGSize(width: 20, height: 10), cornerRadius: 3)
         enemyBullet.name = enemyBulletName
         enemyBullet.fillColor = .red
         enemyBullet.strokeColor = .red
@@ -265,7 +284,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         enemyBullet.physicsBody?.linearDamping = 0
         enemyBullet.physicsBody?.fieldBitMask = 0
         enemyBullet.physicsBody?.categoryBitMask = enemyBulletCategory
-        //playerBullet.physicsBody?.contactTestBitMask = 0
+        enemyBullet.physicsBody?.contactTestBitMask = playerCategory
         enemyBullet.physicsBody?.collisionBitMask = 0
         //playerBullet.physicsBody?.usesPreciseCollisionDetection = true
         addChild(enemyBullet)
@@ -300,6 +319,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func touchUp(atPoint pos : CGPoint) {
+        for body in (player.physicsBody?.allContactedBodies())! {
+            // check if one of these is an enemy bullet, end game if it is
+        }
+        playerIsVulnerable = false
         player.physicsBody?.velocity = playerVelocity
         player.physicsBody?.fieldBitMask = enemyGravityCategory
         for enemy in enemies {
@@ -309,7 +332,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             enemy.physicsBody?.fieldBitMask = playerGravityCategory
         }
     }
-    
+    func endGame() {
+        let reveal = SKTransition.doorsOpenVertical(withDuration: 0.5)
+        let menuScene = MenuScene(size: self.size)
+        self.view?.presentScene(menuScene, transition: reveal)
+    }
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         if let label = self.label {
             label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
