@@ -13,15 +13,15 @@ class MenuScene: SKScene {
     
     let playButton = SKLabelNode()
     
-    
     override init(size: CGSize) {
         super.init(size: size)
         
-        backgroundColor = SKColor.white
+        backgroundColor = SKColor.black
         
-        playButton.fontColor = SKColor.black
+        playButton.fontColor = SKColor.white
         playButton.text = "play"
-        
+        playButton.fontSize = 60
+        playButton.fontName = "Avenir-Black"
         playButton.position = CGPoint(x: size.width / 2, y: size.height / 2)
         
         addChild(playButton)
@@ -37,7 +37,7 @@ class MenuScene: SKScene {
         let touchLocation = touch!.location(in: self)
         
         if playButton.contains(touchLocation) {
-            let reveal = SKTransition.doorsOpenVertical(withDuration: 0.5)
+            let reveal = SKTransition.doorsOpenVertical(withDuration: 0.1)
             let gameScene = GameScene(size: self.size)
             self.view?.presentScene(gameScene, transition: reveal)
         }

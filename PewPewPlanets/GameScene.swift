@@ -27,6 +27,7 @@ func / (point: CGPoint, scalar: CGFloat) -> CGPoint {
 }
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
+    // should stuff stop moving when tapping?
     // maybe get rid of player gravity?
     // reuse enemies
     // need to be able to tell when enemies are about to shoot
@@ -124,6 +125,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         for _ in 0...5 {
             addEnemy()
         }
+        let light = SKLightNode()
+        light.categoryBitMask = 128
+        addChild(light)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -179,15 +183,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     func touchDown(atPoint pos : CGPoint) {
-        for body in (player.physicsBody?.allContactedBodies())! {
-            // check if one of these is an enemy bullet, end game if it is
+        if let bodiesTouchingPlayer = player.physicsBody?.allContactedBodies() {
+            for body in bodiesTouchingPlayer {
+                if body.categoryBitMask == enemyBulletCategory {
+                    endGame()
+                }
+            }
         }
         playerIsVulnerable = true
-        if let currentPlayerVelocity = player.physicsBody?.velocity {
-            playerVelocity = currentPlayerVelocity
-        }
-        player.physicsBody?.velocity = CGVector.zero
-        player.physicsBody?.fieldBitMask = 0
+//        if let currentPlayerVelocity = player.physicsBody?.velocity {
+//            playerVelocity = currentPlayerVelocity
+//        }
+//        player.physicsBody?.velocity = CGVector.zero
+//        player.physicsBody?.fieldBitMask = 0
         for enemy in enemies {
             velocityMap[enemy] = enemy.physicsBody?.velocity
             enemy.physicsBody?.velocity = CGVector.init(dx: 0, dy: 0)
@@ -224,6 +232,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     func addEnemy() {
         let enemy = SKShapeNode.init(circleOfRadius: 20)
+        
+        let e = SKSpriteNode(imageNamed: "")
+        e.lightingBitMask = 128
+        
         enemy.name = enemyName
         enemy.fillColor = .yellow
         enemy.strokeColor = .yellow
@@ -306,8 +318,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(star)
     }
     func moveStar(star: SKShapeNode) { // this does not work: stars move into camera
-        let newX = 1.9*player.position.x - star.position.x
-        let newY = 1.9*player.position.y - star.position.y
+        let newX = 2*player.position.x - star.position.x
+        let newY = 2*player.position.y - star.position.y
         star.position = CGPoint(x: newX, y: newY)
     }
     func touchMoved(toPoint pos : CGPoint) {
@@ -319,12 +331,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func touchUp(atPoint pos : CGPoint) {
-        for body in (player.physicsBody?.allContactedBodies())! {
-            // check if one of these is an enemy bullet, end game if it is
-        }
         playerIsVulnerable = false
-        player.physicsBody?.velocity = playerVelocity
-        player.physicsBody?.fieldBitMask = enemyGravityCategory
+//        player.physicsBody?.velocity = playerVelocity
+//        player.physicsBody?.fieldBitMask = enemyGravityCategory
         for enemy in enemies {
             if let velocity = velocityMap[enemy] {
                 enemy.physicsBody?.velocity = velocity
@@ -333,7 +342,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     func endGame() {
-        let reveal = SKTransition.doorsOpenVertical(withDuration: 0.5)
+        let reveal = SKTransition.doorsOpenVertical(withDuration: 0.1)
         let menuScene = MenuScene(size: self.size)
         self.view?.presentScene(menuScene, transition: reveal)
     }

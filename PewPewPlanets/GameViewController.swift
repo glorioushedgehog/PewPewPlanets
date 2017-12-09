@@ -14,13 +14,14 @@ class GameViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         let menuScene = MenuScene(size: view.bounds.size)
         
         let skView = view as! SKView
         skView.showsFPS = true
         skView.showsNodeCount = true
         skView.ignoresSiblingOrder = true
-        menuScene.scaleMode = .resizeFill
+        //menuScene.scaleMode = .resizeFill
         skView.presentScene(menuScene)
 //        if let view = self.view as? SKView {
 //            let scene = GameScene(size: view.frame.size)
@@ -40,7 +41,7 @@ class GameViewController: UIViewController {
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         if UIDevice.current.userInterfaceIdiom == .phone {
-            return .allButUpsideDown
+            return .portrait
         } else {
             return .all
         }
