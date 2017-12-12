@@ -16,12 +16,14 @@ func - (left: CGPoint, right: CGPoint) -> CGPoint {
     return CGPoint(x: left.x - right.x, y: left.y - right.y)
 }
 class GameScene: SKScene, SKPhysicsContactDelegate {
-    // need to be able to tell when enemies are about to shoot
+    
+    static var shared = GameScene(size: CGSize.zero)
+    
     private var label : SKLabelNode?
     private var spinnyNode : SKShapeNode?
     
     private let random: GKMersenneTwisterRandomSource
-    private let player: SKShapeNode
+    let player = SKShapeNode.init(circleOfRadius: 10)
     private let playerGravityCategory: UInt32 = 0x1 << 0
     private let enemyGravityCategory: UInt32 = 0x1 << 1
     private let playerBulletCategory: UInt32 = 0x1 << 2
@@ -35,10 +37,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     private let starName = "star"
     
     private let playerBulletSpeed: CGFloat = 1000
-    private let enemyBulletSpeed: CGFloat = 200
+    let enemyBulletSpeed: CGFloat = 200
+    let enemySpeed: CGFloat = 200 // used to be 100
     private let maxDistanceFromPlayer: CGFloat
     private let screenCenter: CGPoint
-    private let enemyRadius: CGFloat = 20
+    let enemyRadius: CGFloat = 20
     private var playerIsVulnerable: Bool
     
     private let starZPosition: CGFloat = 0
@@ -54,52 +57,22 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override init(size: CGSize) {
         self.random = GKMersenneTwisterRandomSource()
-        self.player = SKShapeNode.init(circleOfRadius: 10)
         self.playerIsVulnerable = false
         self.screenCenter = CGPoint(x: size.width/2, y: size.height/2)
         self.maxDistanceFromPlayer = max(size.width, size.height)*0.6
         super.init(size: size)
-        
         physicsWorld.contactDelegate = self
         physicsWorld.gravity = CGVector.zero
+        buildPlayer()
+    }
+    override func didMove(to view: SKView) {
         //physicsWorld.speed = 0.9
         backgroundColor = .black
-        
         let cameraNode = SKCameraNode()
         player.position = screenCenter
         player.addChild(cameraNode)
         camera = cameraNode
-        
-        
-        player.fillColor = playerColor
-        player.strokeColor = playerColor
-        player.zPosition = playerZPosition
-        
-        let playerGravity = SKFieldNode.radialGravityField()
-        playerGravity.strength = 1
-        playerGravity.falloff = 2
-        playerGravity.categoryBitMask = playerGravityCategory
-        playerGravity.minimumRadius = 50
-        player.addChild(playerGravity)
-        
-        player.physicsBody = SKPhysicsBody(circleOfRadius: 10)
-        
-        player.physicsBody?.fieldBitMask = enemyGravityCategory
-        
-        player.physicsBody?.categoryBitMask = playerCategory
-        player.physicsBody?.contactTestBitMask = 0
-        player.physicsBody?.collisionBitMask = 0
-        
-        let playerTrailEmitter = newPlayerTrailEmitter()
-        if let playerTrail = playerTrailEmitter {
-            playerTrail.zPosition = particleZPosition
-            playerTrail.targetNode = self
-            player.addChild(playerTrail)
-        }
-        //player.physicsBody?.allowsRotation = false
-        //player.physicsBody?.fieldBitMask = 0
         addChild(player)
-        
         for _ in 0...50 {
             addStar()
         }
@@ -107,11 +80,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             addEnemy()
         }
     }
-    
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     func didBegin(_ contact: SKPhysicsContact) {
+        if contact.bodyA.node?.parent == nil || contact.bodyB.node?.parent == nil {
+            return
+        }
         let enemy: SKShapeNode?
         let playerBullet: SKShapeNode?
         if contact.bodyA.categoryBitMask == enemyCategory && contact.bodyB.categoryBitMask == playerBulletCategory {
@@ -145,9 +120,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 deadEnemyExplosion.zPosition = particleZPosition
                 deadEnemyExplosion.targetNode = self
                 let sequence = [SKAction.wait(forDuration: 0.1),
-                                SKAction.run {
-                                    deadEnemyExplosion.particleBirthRate = 0;
-                    },
+                                SKAction.run { deadEnemyExplosion.particleBirthRate = 0; },
                                 SKAction.wait(forDuration: 2),
                                 SKAction.removeFromParent()]
                 deadEnemyExplosion.run(SKAction.sequence(sequence))
@@ -194,6 +167,35 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         //playerBullet.physicsBody?.usesPreciseCollisionDetection = true
         addChild(playerBullet)
     }
+    func buildPlayer() {
+        player.fillColor = playerColor
+        player.strokeColor = playerColor
+        player.zPosition = playerZPosition
+        
+        let playerGravity = SKFieldNode.radialGravityField()
+        playerGravity.strength = 1
+        playerGravity.falloff = 2
+        playerGravity.categoryBitMask = playerGravityCategory
+        playerGravity.minimumRadius = 50
+        player.addChild(playerGravity)
+        
+        player.physicsBody = SKPhysicsBody(circleOfRadius: 10)
+        
+        player.physicsBody?.fieldBitMask = enemyGravityCategory
+        
+        player.physicsBody?.categoryBitMask = playerCategory
+        player.physicsBody?.contactTestBitMask = 0
+        player.physicsBody?.collisionBitMask = 0
+        
+        let playerTrailEmitter = newPlayerTrailEmitter()
+        if let playerTrail = playerTrailEmitter {
+            playerTrail.zPosition = particleZPosition
+            playerTrail.targetNode = self
+            player.addChild(playerTrail)
+        }
+        //player.physicsBody?.allowsRotation = false
+        //player.physicsBody?.fieldBitMask = 0
+    }
     func buildEnemy() -> SKShapeNode {
         let enemy = SKShapeNode.init(circleOfRadius: enemyRadius)
         enemy.name = enemyName
@@ -204,14 +206,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         //enemy.physicsBody?.velocity = (player.physicsBody?.velocity)!
         let sequence = [SKAction.wait(forDuration: 0.5),
                         SKAction.run {
-                            self.addEnemyBullet(enemy: enemy)
-            }]
+                            self.addEnemyBullet(enemy: enemy)}]
         enemy.run(SKAction.repeatForever(SKAction.sequence(sequence)))
         enemy.physicsBody?.fieldBitMask = playerGravityCategory
         enemy.physicsBody?.linearDamping = 0
         enemy.physicsBody?.categoryBitMask = enemyCategory
         enemy.physicsBody?.contactTestBitMask = playerBulletCategory
-        enemy.physicsBody?.collisionBitMask = 0
+        enemy.physicsBody?.collisionBitMask = 0//enemyCategory
         let enemyGravity = SKFieldNode.radialGravityField()
         enemyGravity.strength = 1
         enemyGravity.falloff = 2
@@ -224,45 +225,53 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let enemy = buildEnemy()
         if random.nextBool() {
             if random.nextBool() {
-                // left side
-                enemy.position = CGPoint(x: -2 * enemyRadius, y: size.height * CGFloat(random.nextUniform())) + player.position - screenCenter
-                enemy.physicsBody?.velocity = CGVector.init(dx: 100, dy: 0)
+                let x = -2 * enemyRadius
+                let y = size.height * CGFloat(random.nextUniform())
+                enemy.position = CGPoint(x: x, y: y) + player.position - screenCenter
+                enemy.physicsBody?.velocity = CGVector.init(dx: enemySpeed, dy: 0)
             } else {
-                // right side
-                enemy.position = CGPoint(x: size.width + 2 * enemyRadius, y: size.height*CGFloat(random.nextUniform())) + player.position - screenCenter
-                enemy.physicsBody?.velocity = CGVector.init(dx: -100, dy: 0)
+                let x = size.width + 2 * enemyRadius
+                let y = size.height*CGFloat(random.nextUniform())
+                enemy.position = CGPoint(x: x, y: y) + player.position - screenCenter
+                enemy.physicsBody?.velocity = CGVector.init(dx: -enemySpeed, dy: 0)
             }
         } else {
             if random.nextBool() {
-                // top
-                enemy.position = CGPoint(x: size.width * CGFloat(random.nextUniform()), y: size.height +  2 * enemyRadius) + player.position - screenCenter
-                enemy.physicsBody?.velocity = CGVector.init(dx: 0, dy: -100)
+                let x = size.width * CGFloat(random.nextUniform())
+                let y = size.height +  2 * enemyRadius
+                enemy.position = CGPoint(x: x, y: y) + player.position - screenCenter
+                enemy.physicsBody?.velocity = CGVector.init(dx: 0, dy: -enemySpeed)
             } else {
-                // bottom
-                enemy.position = CGPoint(x: size.width * CGFloat(random.nextUniform()), y: -2 * enemyRadius) + player.position - screenCenter
-                enemy.physicsBody?.velocity = CGVector.init(dx: 0, dy: 100)
+                let x = size.width * CGFloat(random.nextUniform())
+                let y = -2 * enemyRadius
+                enemy.position = CGPoint(x: x, y: y) + player.position - screenCenter
+                enemy.physicsBody?.velocity = CGVector.init(dx: 0, dy: enemySpeed)
             }
         }
         addChild(enemy)
     }
     func addEnemyBullet(enemy: SKShapeNode) {
+        let enemyBullet = buildEnemyBullet()
+        enemyBullet.position = enemy.position
+        enemyBullet.physicsBody?.velocity = enemy.position.aimVector(point: player.position, speed: enemyBulletSpeed)
+        enemyBullet.zRotation = angle(vector: enemy.position.aimVector(point: player.position, speed: enemyBulletSpeed))
+        addChild(enemyBullet)
+    }
+    func buildEnemyBullet() -> SKShapeNode {
         let enemyBullet = SKShapeNode.init(rectOf: CGSize(width: 20, height: 10), cornerRadius: 3)
         enemyBullet.name = enemyBulletName
         enemyBullet.fillColor = enemyBulletColor
         enemyBullet.strokeColor = enemyBulletColor
-        enemyBullet.position = enemy.position
         enemyBullet.zPosition = enemyBulletZPosition
         enemyBullet.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 20, height: 10))
         //enemyBullet.physicsBody = SKPhysicsBody(circleOfRadius: 5)
-        enemyBullet.physicsBody?.velocity = enemy.position.aimVector(point: player.position, speed: enemyBulletSpeed)
-        enemyBullet.zRotation = angle(vector: enemy.position.aimVector(point: player.position, speed: enemyBulletSpeed))
         enemyBullet.physicsBody?.linearDamping = 0
         enemyBullet.physicsBody?.fieldBitMask = 0
         enemyBullet.physicsBody?.categoryBitMask = enemyBulletCategory
         enemyBullet.physicsBody?.contactTestBitMask = playerCategory
         enemyBullet.physicsBody?.collisionBitMask = 0
         //playerBullet.physicsBody?.usesPreciseCollisionDetection = true
-        addChild(enemyBullet)
+        return enemyBullet
     }
     func addStar() {
         let star = SKShapeNode.init(rectOf: CGSize(width: 3, height: 3))
@@ -286,32 +295,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let newY = 2*player.position.y - star.position.y
         star.position = CGPoint(x: newX, y: newY)
     }
-    func touchMoved(toPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.blue
-            self.addChild(n)
-        }
-    }
     
     func touchUp(atPoint pos : CGPoint) {
         playerIsVulnerable = false
     }
     func endGame() {
+        //let s = view?.texture(from: self)
+        //view?.isPaused = true
         let reveal = SKTransition.doorsOpenVertical(withDuration: 0.2)
         let menuScene = MenuScene(size: self.size)
         self.view?.presentScene(menuScene, transition: reveal)
     }
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let label = self.label {
-            label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
-        }
-        
         for t in touches { self.touchDown(atPoint: t.location(in: self)) }
-    }
-    
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchMoved(toPoint: t.location(in: self)) }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -324,11 +320,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     
     override func update(_ currentTime: TimeInterval) {
+        var count = 0
         enumerateChildNodes(withName: enemyName) { (enemy, stop) in
+            count += 1
             if enemy.position.distance(point: self.player.position) > self.maxDistanceFromPlayer {
                 enemy.removeFromParent()
                 self.addEnemy()
             }
+        }
+        if count > 6 {
+            print("too many enemies")
         }
         enumerateChildNodes(withName: enemyBulletName) { (enemyBullet, stop) in
             if enemyBullet.position.distance(point: self.player.position) > self.maxDistanceFromPlayer {
@@ -342,7 +343,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         enumerateChildNodes(withName: starName) { (star, stop) in
             if star.position.distance(point: self.player.position) > self.maxDistanceFromPlayer {
-                self.moveStar(star: star as! SKShapeNode)
+                if let starToMove = star as? SKShapeNode {
+                    self.moveStar(star: starToMove)
+                }
             }
         }
     }

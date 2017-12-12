@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		160744741FDF726E009E4DB9 /* StarFall.sks in Resources */ = {isa = PBXBuildFile; fileRef = 160744731FDF726E009E4DB9 /* StarFall.sks */; };
 		16BC3CD91FDB71F8007B1AB1 /* MenuScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16BC3CD81FDB71F8007B1AB1 /* MenuScene.swift */; };
 		16C7DAE31FDCF2510063459B /* TutorialScene1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C7DAE21FDCF2510063459B /* TutorialScene1.swift */; };
 		16C7DAE51FDCF37B0063459B /* TutorialScene2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C7DAE41FDCF37B0063459B /* TutorialScene2.swift */; };
@@ -40,6 +41,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		160744731FDF726E009E4DB9 /* StarFall.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = StarFall.sks; sourceTree = "<group>"; };
 		16BC3CD81FDB71F8007B1AB1 /* MenuScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuScene.swift; sourceTree = "<group>"; };
 		16C7DAE21FDCF2510063459B /* TutorialScene1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorialScene1.swift; sourceTree = "<group>"; };
 		16C7DAE41FDCF37B0063459B /* TutorialScene2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorialScene2.swift; sourceTree = "<group>"; };
@@ -121,6 +123,7 @@
 				16BC3CD81FDB71F8007B1AB1 /* MenuScene.swift */,
 				16C7DAE21FDCF2510063459B /* TutorialScene1.swift */,
 				16C7DAE41FDCF37B0063459B /* TutorialScene2.swift */,
+				160744731FDF726E009E4DB9 /* StarFall.sks */,
 			);
 			path = PewPewPlanets;
 			sourceTree = "<group>";
@@ -252,6 +255,7 @@
 			files = (
 				16F6026A1FCFA70F004AFC87 /* Main.storyboard in Resources */,
 				16F6026C1FCFA70F004AFC87 /* Assets.xcassets in Resources */,
+				160744741FDF726E009E4DB9 /* StarFall.sks in Resources */,
 				16F6026F1FCFA70F004AFC87 /* LaunchScreen.storyboard in Resources */,
 				16D072751FD3493C0065A4AC /* PlayerTrail.sks in Resources */,
 				16D072771FD35CC80065A4AC /* EnemyDeath.sks in Resources */,
