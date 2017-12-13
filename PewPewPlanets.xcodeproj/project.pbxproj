@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		160744741FDF726E009E4DB9 /* StarFall.sks in Resources */ = {isa = PBXBuildFile; fileRef = 160744731FDF726E009E4DB9 /* StarFall.sks */; };
+		167D8A851FE08D9B00555A4E /* HighScoreStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 167D8A841FE08D9B00555A4E /* HighScoreStorage.swift */; };
+		16A3D0C31FE094E0006F8514 /* GameOverScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16A3D0C21FE094E0006F8514 /* GameOverScene.swift */; };
 		16BC3CD91FDB71F8007B1AB1 /* MenuScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16BC3CD81FDB71F8007B1AB1 /* MenuScene.swift */; };
 		16C7DAE31FDCF2510063459B /* TutorialScene1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C7DAE21FDCF2510063459B /* TutorialScene1.swift */; };
 		16C7DAE51FDCF37B0063459B /* TutorialScene2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C7DAE41FDCF37B0063459B /* TutorialScene2.swift */; };
@@ -42,6 +44,8 @@
 
 /* Begin PBXFileReference section */
 		160744731FDF726E009E4DB9 /* StarFall.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = StarFall.sks; sourceTree = "<group>"; };
+		167D8A841FE08D9B00555A4E /* HighScoreStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighScoreStorage.swift; sourceTree = "<group>"; };
+		16A3D0C21FE094E0006F8514 /* GameOverScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverScene.swift; sourceTree = "<group>"; };
 		16BC3CD81FDB71F8007B1AB1 /* MenuScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuScene.swift; sourceTree = "<group>"; };
 		16C7DAE21FDCF2510063459B /* TutorialScene1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorialScene1.swift; sourceTree = "<group>"; };
 		16C7DAE41FDCF37B0063459B /* TutorialScene2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorialScene2.swift; sourceTree = "<group>"; };
@@ -124,6 +128,8 @@
 				16C7DAE21FDCF2510063459B /* TutorialScene1.swift */,
 				16C7DAE41FDCF37B0063459B /* TutorialScene2.swift */,
 				160744731FDF726E009E4DB9 /* StarFall.sks */,
+				167D8A841FE08D9B00555A4E /* HighScoreStorage.swift */,
+				16A3D0C21FE094E0006F8514 /* GameOverScene.swift */,
 			);
 			path = PewPewPlanets;
 			sourceTree = "<group>";
@@ -285,9 +291,11 @@
 			files = (
 				16F602651FCFA70F004AFC87 /* GameScene.swift in Sources */,
 				16C7DAE51FDCF37B0063459B /* TutorialScene2.swift in Sources */,
+				16A3D0C31FE094E0006F8514 /* GameOverScene.swift in Sources */,
 				16C7DAE31FDCF2510063459B /* TutorialScene1.swift in Sources */,
 				16BC3CD91FDB71F8007B1AB1 /* MenuScene.swift in Sources */,
 				16F602671FCFA70F004AFC87 /* GameViewController.swift in Sources */,
+				167D8A851FE08D9B00555A4E /* HighScoreStorage.swift in Sources */,
 				16F6025F1FCFA70F004AFC87 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

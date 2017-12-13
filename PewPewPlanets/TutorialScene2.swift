@@ -7,27 +7,34 @@
 //
 
 import SpriteKit
-//import GameplayKit
 
 class TutorialScene2: SKScene {
     
-    let playButton = SKShapeNode.init(rectOf: CGSize(width: 300, height: 80), cornerRadius: 3)
+    let playButton: SKShapeNode
     
     override init(size: CGSize) {
+        self.playButton = SKShapeNode.init(rectOf: CGSize(width: 0.8 * size.width, height: 0.213 * size.width), cornerRadius: 0.008 * size.width)
         super.init(size: size)
         
-        GameScene.shared = GameScene.init(size: CGSize.zero)
-        
         backgroundColor = SKColor.black
-        drawText(toDraw: "Shoot back by tapping the screen!", atHeight: 7 * size.height / 8)
-        drawText(toDraw: "(it doesn't matter where you tap)", atHeight: 6 * size.height / 8)
-        drawText(toDraw: "Be careful:", atHeight: 3 * size.height / 8)
-        drawText(toDraw: "When shooting, you can DIE!", atHeight: 2 * size.height / 8)
+        
+        let player = GameScene.shared.player
+        player.position = CGPoint(x: size.width/2, y: size.height/2)
+        player.zPosition = 1
+        player.physicsBody?.affectedByGravity = false
+        player.removeFromParent()
+        addChild(player)
+        
+        drawText(toDraw: "Shoot back by tapping the screen!", atHeight: 18 * size.height / 20)
+        drawText(toDraw: "(it doesn't matter where you tap)", atHeight: 17 * size.height / 20)
+        drawText(toDraw: "Be careful:", atHeight: 6 * size.height / 20)
+        drawText(toDraw: "when shooting, you ARE", atHeight: 5 * size.height / 20)
+        drawText(toDraw: "VULNERABLE to enemy fire!", atHeight: 4 * size.height / 20)
         
         let playButtonText = SKLabelNode()
         playButtonText.fontColor = SKColor.white
         playButtonText.text = "play"
-        playButtonText.fontSize = 30
+        playButtonText.fontSize = 0.08 * size.width
         playButtonText.fontName = "Avenir-Black"
         playButtonText.verticalAlignmentMode = .center
         playButton.addChild(playButtonText)
@@ -39,7 +46,7 @@ class TutorialScene2: SKScene {
         let text = SKLabelNode()
         text.fontColor = SKColor.white
         text.text = toDraw
-        text.fontSize = 20
+        text.fontSize = 0.053 * size.width
         text.fontName = "Avenir-Black"
         text.position = CGPoint(x: size.width / 2, y: atHeight)
         addChild(text)

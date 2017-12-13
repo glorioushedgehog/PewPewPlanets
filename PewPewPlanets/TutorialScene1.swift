@@ -7,29 +7,29 @@
 //
 
 import SpriteKit
-//import GameplayKit
 
 class TutorialScene1: SKScene {
     
-    let nextButton = SKShapeNode.init(rectOf: CGSize(width: 300, height: 80), cornerRadius: 3)
+    let nextButton: SKShapeNode
     let playerPosition: CGPoint
-    let enemyBulletSpeed: CGFloat = 300
+    let enemyBulletSpeed: CGFloat
     let enemySpeed: CGFloat
     required init(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     override init(size: CGSize) {
-        playerPosition = CGPoint(x: size.width/2, y: 5 * size.height / 8)
-        enemySpeed = GameScene.shared.enemySpeed
+        self.nextButton = SKShapeNode.init(rectOf: CGSize(width: 0.8 * size.width, height: 0.213 * size.width), cornerRadius: 3)
+        self.playerPosition = CGPoint(x: size.width/2, y: 5 * size.height / 8)
+        self.enemyBulletSpeed = 0.8 * size.width
+        self.enemySpeed = GameScene.shared.enemySpeed
         super.init(size: size)
-        
-        GameScene.shared = GameScene.init(size: CGSize.zero)
         
         backgroundColor = SKColor.black
         let player = GameScene.shared.player
         player.position = playerPosition
         player.zPosition = 1
-        player.physicsBody?.isDynamic = false
+        player.physicsBody?.affectedByGravity = false
+        player.removeFromParent()
         addChild(player)
         let enemyRadius = GameScene.shared.enemyRadius
         var startingPosition: CGPoint
@@ -51,7 +51,7 @@ class TutorialScene1: SKScene {
         let nextButtonText = SKLabelNode()
         nextButtonText.fontColor = SKColor.white
         nextButtonText.text = "next"
-        nextButtonText.fontSize = 30
+        nextButtonText.fontSize = 0.08 * size.width
         nextButtonText.fontName = "Avenir-Black"
         nextButtonText.verticalAlignmentMode = .center
         nextButton.addChild(nextButtonText)
@@ -78,7 +78,7 @@ class TutorialScene1: SKScene {
         let text = SKLabelNode()
         text.fontColor = SKColor.white
         text.text = toDraw
-        text.fontSize = 20
+        text.fontSize = 0.053 * size.width
         text.fontName = "Avenir-Black"
         text.zPosition = 2
         text.position = CGPoint(x: size.width / 2, y: atHeight)
