@@ -10,13 +10,17 @@ import SpriteKit
 
 class GameOverScene: SKScene {
     
-    let menuButton: SKShapeNode
-    
+    private let menuButton: SKShapeNode
+    private let playerColor = UIColor(red: 0.4, green: 0.8, blue: 1, alpha: 1)
+    private let enemyBulletColor = UIColor(red: 1, green: 0.2, blue: 0.2, alpha: 1)
+    required init(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     override init(size: CGSize) {
         self.menuButton = SKShapeNode.init(rectOf: CGSize(width: 0.267 * size.width, height: 0.133 * size.width), cornerRadius: 3)
         super.init(size: size)
     }
-    func configure(numKills: Int) {
+    func configure(numKills: Int, killerBulletPosition: CGPoint, killerBulletAngle: CGFloat) {
         backgroundColor = SKColor.black
         var highScore = HighScoreStorage.shared.getHighScore()
         if numKills > highScore {
@@ -37,6 +41,22 @@ class GameOverScene: SKScene {
         menuButton.zPosition = 1
         menuButton.position = CGPoint(x: size.width / 2, y: 2 * size.height / 8)
         addChild(menuButton)
+        
+        let player = SKShapeNode.init(circleOfRadius: 0.0267 * size.width)
+        player.zPosition = 1
+        player.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        player.fillColor = playerColor
+        player.strokeColor = playerColor
+        addChild(player)
+        let width = 0.0533 * size.width
+        let height = 0.0267 * size.width
+        let enemyBullet = SKShapeNode.init(rectOf: CGSize(width: width, height: height), cornerRadius: 0.008 * size.width)
+        enemyBullet.zPosition = 0
+        enemyBullet.position = killerBulletPosition
+        enemyBullet.zRotation = killerBulletAngle
+        enemyBullet.fillColor = enemyBulletColor
+        enemyBullet.strokeColor = enemyBulletColor
+        addChild(enemyBullet)
     }
     func drawText(text: String, fontSize: CGFloat, atHeight: CGFloat) {
         let labelNode = SKLabelNode()
@@ -47,9 +67,6 @@ class GameOverScene: SKScene {
         labelNode.zPosition = 1
         labelNode.position = CGPoint(x: size.width / 2, y: atHeight)
         addChild(labelNode)
-    }
-    required init(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch = touches.first

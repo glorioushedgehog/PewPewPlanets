@@ -12,6 +12,9 @@ class MenuScene: SKScene {
     
     let tutorialButton: SKShapeNode
     
+    required init(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     override init(size: CGSize) {
         self.tutorialButton = SKShapeNode.init(rectOf: CGSize(width: 0.267 * size.width, height: 0.133 * size.width), cornerRadius: 3)
         super.init(size: size)
@@ -51,9 +54,6 @@ class MenuScene: SKScene {
         labelNode.zPosition = 1
         labelNode.position = CGPoint(x: size.width / 2, y: atHeight)
         addChild(labelNode)
-    }
-    required init(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
     func newStarEmitter() -> SKEmitterNode? {
         return SKEmitterNode(fileNamed: "StarFall.sks")
