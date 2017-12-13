@@ -9,12 +9,12 @@
 import SpriteKit
 import GameplayKit
 
+// run the game as an SKPhysicsWorld
 class GameScene: SKScene, SKPhysicsContactDelegate {
-    
-    private var label : SKLabelNode?
-    private var spinnyNode : SKShapeNode?
-    
+    // the blue circle in the middle of the screen
+    // the camera follows the player
     private let player: SKShapeNode
+    
     private let random: GKMersenneTwisterRandomSource
     private let playerGravityCategory: UInt32 = 0x1 << 0
     private let enemyGravityCategory: UInt32 = 0x1 << 1

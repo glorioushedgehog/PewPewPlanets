@@ -32,7 +32,9 @@ class MenuScene: SKScene {
         let highScore = HighScoreStorage.shared.getHighScore()
         drawText(text: "PEW PEW", fontSize: 0.16 * size.width, atHeight: 7 * size.height / 8)
         drawText(text: "PLANETS", fontSize: 0.16 * size.width, atHeight: 6 * size.height / 8)
-        drawText(text: "high score: " + String(highScore), fontSize: 0.053 * size.width, atHeight: 5 * size.height / 8)
+        if highScore != 0 {
+            drawText(text: "high score: " + String(highScore), fontSize: 0.053 * size.width, atHeight: 5 * size.height / 8)
+        }
         drawText(text: "tap screen to play", fontSize: 0.053 * size.width, atHeight: size.height / 8)
         let tutorialButtontext = SKLabelNode()
         tutorialButtontext.text = "tutorial"

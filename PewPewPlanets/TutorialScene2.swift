@@ -58,12 +58,31 @@ class TutorialScene2: SKScene, SKPhysicsContactDelegate {
             addEnemy()
         }
         startTimers()
-        drawText(toDraw: "Shoot back by tapping the screen!", atHeight: 18 * size.height / 20)
+        drawText(toDraw: "Tap the screen to pew pew back!", atHeight: 18 * size.height / 20)
         drawText(toDraw: "(it doesn't matter where you tap)", atHeight: 17 * size.height / 20)
         drawText(toDraw: "Be careful:", atHeight: 6 * size.height / 20)
-        drawText(toDraw: "when shooting, you ARE", atHeight: 5 * size.height / 20)
-        drawText(toDraw: "VULNERABLE to enemy fire!", atHeight: 4 * size.height / 20)
+        drawText(toDraw: "when pew pewing, you ARE", atHeight: 5 * size.height / 20)
+        drawText(toDraw: "VULNERABLE!", atHeight: 4 * size.height / 20)
         
+        buildTextBackgrounds()
+        buildPlayButton()
+    }
+    func buildTextBackgrounds() {
+        let background1 = SKShapeNode.init(rectOf: CGSize(width: 0.9 * size.width, height: 0.2 * size.width), cornerRadius: 0.008 * size.width)
+        background1.zPosition = uiZPosition
+        background1.position = CGPoint(x: size.width / 2, y: 7.1 * size.height / 8)
+        background1.fillColor = .black
+        background1.strokeColor = .black
+        addChild(background1)
+        
+        let background2 = SKShapeNode.init(rectOf: CGSize(width: 0.8 * size.width, height: 0.3 * size.width), cornerRadius: 0.008 * size.width)
+        background2.zPosition = uiZPosition
+        background2.position = CGPoint(x: size.width / 2, y: 0.27 * size.height)
+        background2.fillColor = .black
+        background2.strokeColor = .black
+        addChild(background2)
+    }
+    func buildPlayButton() {
         let playButtonText = SKLabelNode()
         playButtonText.fontColor = SKColor.white
         playButtonText.text = "play"

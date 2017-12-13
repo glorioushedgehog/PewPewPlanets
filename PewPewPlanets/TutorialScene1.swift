@@ -29,7 +29,7 @@ class TutorialScene1: SKScene {
     }
     override init(size: CGSize) {
         self.random = GKMersenneTwisterRandomSource()
-        self.nextButton = SKShapeNode.init(rectOf: CGSize(width: 0.8 * size.width, height: 0.213 * size.width), cornerRadius: 3)
+        self.nextButton = SKShapeNode.init(rectOf: CGSize(width: 0.8 * size.width, height: 0.213 * size.width), cornerRadius: 0.008 * size.width)
         self.playerPosition = CGPoint(x: size.width/2, y: 5 * size.height / 8)
         self.enemyBulletSpeed = 0.8 * size.width
         self.enemySpeed = 0.533 * size.width
@@ -46,30 +46,55 @@ class TutorialScene1: SKScene {
         for _ in 0...20 {
             addStar()
         }
-        addMovingEnemies()
+        for _ in 0...5 {
+            chooseEnemyPath()
+        }
         
         drawText(toDraw: "Planets are pew pewing you?", atHeight: 7 * size.height / 8)
         drawText(toDraw: "Fools!", atHeight: size.height / 3)
         drawText(toDraw: "You are invincible!", atHeight: size.height / 4)
+        
+        let background1 = SKShapeNode.init(rectOf: CGSize(width: 0.8 * size.width, height: 0.15 * size.width), cornerRadius: 0.008 * size.width)
+        background1.zPosition = uiZPosition
+        background1.position = CGPoint(x: size.width / 2, y: 7 * size.height / 8)
+        background1.fillColor = .black
+        background1.strokeColor = .black
+        addChild(background1)
+        
+        let background2 = SKShapeNode.init(rectOf: CGSize(width: 0.8 * size.width, height: 0.3 * size.width), cornerRadius: 0.008 * size.width)
+        background2.zPosition = uiZPosition
+        background2.position = CGPoint(x: size.width / 2, y: 0.3 * size.height)
+        background2.fillColor = .black
+        background2.strokeColor = .black
+        addChild(background2)
+        
         addNextButton()
     }
-    func addMovingEnemies() {
-        var startingPosition: CGPoint
-        var endingPosition: CGPoint
-        startingPosition = CGPoint(x: -2 * enemyRadius, y: 6 * size.height / 8)
-        endingPosition = CGPoint(x: size.width + 2 * enemyRadius, y: 5 * size.height / 8)
-        addEnemy(startingPosition: startingPosition, endingPosition: endingPosition)
-        startingPosition = CGPoint(x: size.width / 3, y: -2 * enemyRadius)
-        endingPosition = CGPoint(x: size.width / 5, y: size.height + 2 * enemyRadius)
-        addEnemy(startingPosition: startingPosition, endingPosition: endingPosition)
-        startingPosition = CGPoint(x: -2 * enemyRadius, y: 3 * size.height / 8)
-        endingPosition = CGPoint(x: size.width + 2 * enemyRadius, y: 6 * size.height / 8)
-        addEnemy(startingPosition: startingPosition, endingPosition: endingPosition)
-        startingPosition = CGPoint(x: -2 * enemyRadius, y: 3 * size.height / 8)
-        endingPosition = CGPoint(x: size.width + 2 * enemyRadius, y: 6 * size.height / 8)
-        addEnemy(startingPosition: startingPosition, endingPosition: endingPosition)
-        startingPosition = CGPoint(x: size.width + 2 * enemyRadius, y: 3 * size.height / 8)
-        endingPosition = CGPoint(x: -2 * enemyRadius, y: 5 * size.height / 8)
+    func chooseEnemyPath() {
+        let x1, y1, x2, y2: CGFloat
+        if random.nextBool() {
+            y1 = size.height * CGFloat(random.nextUniform())
+            y2 = size.height * CGFloat(random.nextUniform())
+            if random.nextBool() {
+                x1 = -2 * enemyRadius
+                x2 = size.width + 2 * enemyRadius
+            } else {
+                x1 = size.width + 2 * enemyRadius
+                x2 = -2 * enemyRadius
+            }
+        } else {
+            x1 = size.height * CGFloat(random.nextUniform())
+            x2 = size.height * CGFloat(random.nextUniform())
+            if random.nextBool() {
+                y1 = -2 * enemyRadius
+                y2 = size.height + 2 * enemyRadius
+            } else {
+                y1 = size.height + 2 * enemyRadius
+                y2 = -2 * enemyRadius
+            }
+        }
+        let startingPosition = CGPoint(x: x1, y: y1)
+        let endingPosition = CGPoint(x: x2, y: y2)
         addEnemy(startingPosition: startingPosition, endingPosition: endingPosition)
     }
     func addEnemy(startingPosition: CGPoint, endingPosition: CGPoint) {
