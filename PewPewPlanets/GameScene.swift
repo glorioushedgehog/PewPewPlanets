@@ -502,12 +502,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let enemy = buildEnemy()
         if random.nextBool() {
             if random.nextBool() {
-                // spawn the enemy on the 
+                // spawn the enemy on the left side of the screen
+                // adding player (position -  screen center) compensates for the movement of the
+                // player, so they resulting coordinates are relative to the screen, which follows
+                // the player
                 let x = -2 * enemyRadius + player.position.x - screenCenter.x
                 let y = size.height * CGFloat(random.nextUniform()) + player.position.y - screenCenter.y
                 enemy.position = CGPoint(x: x, y: y)
                 enemy.physicsBody?.velocity = CGVector.init(dx: enemySpeed, dy: 0)
             } else {
+                // spawn the enemy on the right side of the screen.
+                // adding player (position -  screen center) compensates for the movement of the
+                // player, so they resulting coordinates are relative to the screen, which follows
+                // the player
                 let x = size.width + 2 * enemyRadius + player.position.x - screenCenter.x
                 let y = size.height*CGFloat(random.nextUniform()) + player.position.y - screenCenter.y
                 enemy.position = CGPoint(x: x, y: y)
@@ -515,11 +522,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
         } else {
             if random.nextBool() {
+                // spawn the enemy on the top of the screen.
+                // adding player (position -  screen center) compensates for the movement of the
+                // player, so they resulting coordinates are relative to the screen, which follows
+                // the player
                 let x = size.width * CGFloat(random.nextUniform()) + player.position.x - screenCenter.x
                 let y = size.height +  2 * enemyRadius + player.position.y - screenCenter.y
                 enemy.position = CGPoint(x: x, y: y)
                 enemy.physicsBody?.velocity = CGVector.init(dx: 0, dy: -enemySpeed)
             } else {
+                // spawn the enemy on the bottom of the screen.
+                // adding player (position -  screen center) compensates for the movement of the
+                // player, so they resulting coordinates are relative to the screen, which follows
+                // the player
                 let x = size.width * CGFloat(random.nextUniform()) + player.position.x - screenCenter.x
                 let y = -2 * enemyRadius + player.position.y - screenCenter.y
                 enemy.position = CGPoint(x: x, y: y)
@@ -528,6 +543,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         addChild(enemy)
     }
+    // 
     func enemyAimVector(from enemy: SKShapeNode) -> CGVector {
         let dx = player.position.x - enemy.position.x
         let dy = player.position.y - enemy.position.y
@@ -552,7 +568,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         enemyBullet.fillColor = enemyBulletColor
         enemyBullet.strokeColor = enemyBulletColor
         enemyBullet.zPosition = enemyBulletZPosition
-        enemyBullet.physicsBody = SKPhysicsBody(circleOfRadius: height / 2)
+        enemyBullet.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: width, height: height))
         enemyBullet.physicsBody?.linearDamping = 0
         enemyBullet.physicsBody?.fieldBitMask = 0
         enemyBullet.physicsBody?.categoryBitMask = enemyBulletCategory
