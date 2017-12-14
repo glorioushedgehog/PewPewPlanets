@@ -367,6 +367,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // to create a player bullet
         guard let enemyToShoot = closestEnemy else { return }
         let playerBullet = SKShapeNode.init(circleOfRadius: 0.0267 * size.width)
+        // nodes must be named so they can be found by enumerateChildNodes(withName: )
         playerBullet.name = playerBulletName
         playerBullet.fillColor = playerColor
         playerBullet.strokeColor = playerColor
@@ -387,6 +388,28 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // in the physics simulation
         playerBullet.physicsBody?.collisionBitMask = 0
         addChild(playerBullet)
+    }
+    // determine the vector which a player bullet
+    // will follow in the physics simulation. the vector
+    // will be aimed at the given enemy
+    func playerAimVector(enemy: SKShapeNode) -> CGVector {
+        let dx = enemy.position.x - player.position.x
+        let dy = enemy.position.y - player.position.y
+        let distance = distanceToPlayer(from: enemy)
+        // normalize the vector and multiply it by
+        // playerBulletSpeed to give it a magnitude of
+        // playerBulletSpeed. If the enemy has a velocity,
+        // add the enemie's velocity to the bullet velocity.
+        // this will make the bullet lead its target.
+        if let enemyVelocity = enemy.physicsBody?.velocity {
+            let aimDx = playerBulletSpeed * dx / distance + enemyVelocity.dx
+            let aimDy = playerBulletSpeed * dy / distance + enemyVelocity.dy
+            return CGVector.init(dx: aimDx, dy: aimDy)
+        } else {
+            let aimDx = playerBulletSpeed * dx / distance
+            let aimDy = playerBulletSpeed * dy / distance
+            return CGVector.init(dx: aimDx, dy: aimDy)
+        }
     }
     // define the player's appearcance and physical
     // characteristics
@@ -448,6 +471,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     // define the appearance and physical characteristics of enemies
     func buildEnemy() -> SKShapeNode {
         let enemy = SKShapeNode.init(circleOfRadius: enemyRadius)
+        // nodes must be named so they can be found by enumerateChildNodes(withName: )
         enemy.name = enemyName
         enemy.fillColor = enemyColor
         enemy.strokeColor = enemyColor
@@ -502,7 +526,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let enemy = buildEnemy()
         if random.nextBool() {
             if random.nextBool() {
-                // spawn the enemy on the left side of the screen
+                // spawn the enemy on the left side of the screen.
                 // adding player (position -  screen center) compensates for the movement of the
                 // player, so they resulting coordinates are relative to the screen, which follows
                 // the player
@@ -511,10 +535,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 enemy.position = CGPoint(x: x, y: y)
                 enemy.physicsBody?.velocity = CGVector.init(dx: enemySpeed, dy: 0)
             } else {
-                // spawn the enemy on the right side of the screen.
-                // adding player (position -  screen center) compensates for the movement of the
-                // player, so they resulting coordinates are relative to the screen, which follows
-                // the player
+                // spawn the enemy on the right side of the screen
                 let x = size.width + 2 * enemyRadius + player.position.x - screenCenter.x
                 let y = size.height*CGFloat(random.nextUniform()) + player.position.y - screenCenter.y
                 enemy.position = CGPoint(x: x, y: y)
@@ -522,19 +543,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
         } else {
             if random.nextBool() {
-                // spawn the enemy on the top of the screen.
-                // adding player (position -  screen center) compensates for the movement of the
-                // player, so they resulting coordinates are relative to the screen, which follows
-                // the player
+                // spawn the enemy on the top of the screen
                 let x = size.width * CGFloat(random.nextUniform()) + player.position.x - screenCenter.x
                 let y = size.height +  2 * enemyRadius + player.position.y - screenCenter.y
                 enemy.position = CGPoint(x: x, y: y)
                 enemy.physicsBody?.velocity = CGVector.init(dx: 0, dy: -enemySpeed)
             } else {
-                // spawn the enemy on the bottom of the screen.
-                // adding player (position -  screen center) compensates for the movement of the
-                // player, so they resulting coordinates are relative to the screen, which follows
-                // the player
+                // spawn the enemy on the bottom of the screen
                 let x = size.width * CGFloat(random.nextUniform()) + player.position.x - screenCenter.x
                 let y = -2 * enemyRadius + player.position.y - screenCenter.y
                 enemy.position = CGPoint(x: x, y: y)
@@ -543,100 +558,190 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         addChild(enemy)
     }
-    // 
+    // determine the vector that has a magnitude of
+    // enemyBulletSpeed and will head towards the player
+    // from the position of the given enemy
     func enemyAimVector(from enemy: SKShapeNode) -> CGVector {
         let dx = player.position.x - enemy.position.x
         let dy = player.position.y - enemy.position.y
+        // normalize the components, then multiply
+        // by enemyBulletSpeed to get a vector
+        // with magnitude enemyBulletSpeed
         let distance = distanceToPlayer(from: enemy)
         let aimDx = enemyBulletSpeed * dx / distance
         let aimDy = enemyBulletSpeed * dy / distance
         return CGVector.init(dx: aimDx, dy: aimDy)
     }
+    // make a new enemyBullet at the location
+    // of the given enemy. the new bullet
+    // will be aimed towards the player's
+    // current position
     func addEnemyBullet(enemy: SKShapeNode) {
         let enemyBullet = buildEnemyBullet()
         enemyBullet.position = enemy.position
         let velocity = enemyAimVector(from: enemy)
         enemyBullet.physicsBody?.velocity = velocity
+        // rotate the bullet in the direction in which
+        // it will travel
         enemyBullet.zRotation = angle(vector: velocity)
         addChild(enemyBullet)
     }
+    // define the appearance and physical characteristics
+    // of an enemy bullet
     func buildEnemyBullet() -> SKShapeNode {
         let width = 0.0533 * size.width
         let height = 0.0267 * size.width
         let enemyBullet = SKShapeNode.init(rectOf: CGSize(width: width, height: height), cornerRadius: 0.008 * size.width)
+        // nodes must be named so they can be found by enumerateChildNodes(withName: )
         enemyBullet.name = enemyBulletName
         enemyBullet.fillColor = enemyBulletColor
         enemyBullet.strokeColor = enemyBulletColor
         enemyBullet.zPosition = enemyBulletZPosition
-        enemyBullet.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: width, height: height))
+        // to make things easier for the player,
+        // the largest circle that can fit inside the
+        // enemy bullet rectangle is used for collision
+        // detection instead of the entire rectangle
+        enemyBullet.physicsBody = SKPhysicsBody(circleOfRadius: height / 2)
+        // enemy bullets should not slow down over time
         enemyBullet.physicsBody?.linearDamping = 0
+        //  enemy bullets should not be affected by
+        // player gravity or enemy gravity
         enemyBullet.physicsBody?.fieldBitMask = 0
+        // give the bullet a category to help identify it
+        // in didBegin() when it collides with something
         enemyBullet.physicsBody?.categoryBitMask = enemyBulletCategory
+        // make collisions between enemy bullets and the player
+        // get passed to didBegin()
         enemyBullet.physicsBody?.contactTestBitMask = playerCategory
+        // allow enemy bullets to pass through other
+        // bodies in the physics simulation
         enemyBullet.physicsBody?.collisionBitMask = 0
         return enemyBullet
     }
+    // randomly place stars in the circle
+    // whose center is the player and whose
+    // radius is maxDistanceFromPlayer.
+    // this is only used to set up the scene.
+    // as the game runs, stars are moved around
+    // but never made or destroyed.
     func addStar() {
         let star = SKShapeNode.init(rectOf: CGSize(width: 0.005 * size.width, height: 0.005 * size.width))
+        // nodes must be named so they can be found by enumerateChildNodes(withName: )
         star.name = starName
         star.fillColor = .white
         star.strokeColor = .white
-        var x = 2 * maxDistanceFromPlayer * CGFloat(random.nextUniform()) - (maxDistanceFromPlayer - size.width / 2)
-        var y = 2 * maxDistanceFromPlayer * CGFloat(random.nextUniform()) - (maxDistanceFromPlayer - size.height / 2)
-        star.position = CGPoint(x: x, y: y)
-        while distanceToPlayer(from: star) > maxDistanceFromPlayer {
+        star.zPosition = starZPosition
+        // randomly choose a point in the square whose center is
+        // the player and whose side lengths are 2 * maxDistanceFromPlayer.
+        // if the point is further from the player than maxDistanceFromPlayer,
+        // choose a different point. this ensures that the stars are
+        // within the circle defined by maxDistanceFromPlayer
+        var x: CGFloat
+        var y: CGFloat
+        repeat {
+            // the first term takes a random point in the square. the second term shifts the point
+            // to be in the square whose center is the player.
             x = 2 * maxDistanceFromPlayer * CGFloat(random.nextUniform()) - (maxDistanceFromPlayer - size.width / 2)
             y = 2 * maxDistanceFromPlayer * CGFloat(random.nextUniform()) - (maxDistanceFromPlayer - size.height / 2)
             star.position = CGPoint(x: x, y: y)
-        }
-        star.zPosition = starZPosition
+        } while distanceToPlayer(from: star) > maxDistanceFromPlayer
         addChild(star)
     }
-    func moveStar(star: SKShapeNode) {
-        let newX = 2 * player.position.x - star.position.x
-        let newY = 2 * player.position.y - star.position.y
+    // move a star to the opposite side of
+    // the player. used to keep stars in the
+    // view or close to the view as the view
+    // follows the player
+    func moveStar(star: SKNode) {
+        // reflect the star's position around the
+        // players position: find the difference
+        // between the player's position and the
+        // star position, then add it to the player's
+        // position
+        let newX = player.position.x - star.position.x + player.position.x
+        let newY = player.position.y - star.position.y + player.position.y
         star.position = CGPoint(x: newX, y: newY)
     }
-    
+    // present the GameOverScene after telling it
+    // the position and zRotation of the bullet that
+    // killed the player so it can show the user
+    // why they died. also, tell GameOverScene
+    // how many kills the player got so it
+    // can display it and update the user's high
+    // score if it is a new high score.
     func endGame(killerBullet: SKShapeNode) {
+        // make the transition instantanteous
         let reveal = SKTransition.doorsOpenVertical(withDuration: 0)
         let gameOverScene = GameOverScene(size: self.size)
+        // find the position of the bullet that killed the player
+        // relative to the bottom left corner of the screen,
+        // which will be how GameOverScene bases its coordinate system
         let bulletPositionX = killerBullet.position.x - player.position.x + screenCenter.x
         let bulletPositionY = killerBullet.position.y - player.position.y + screenCenter.y
         let bulletPosition = CGPoint(x: bulletPositionX, y: bulletPositionY)
         gameOverScene.configure(numKills: numKills, killerBulletPosition: bulletPosition, killerBulletAngle: killerBullet.zRotation)
         self.view?.presentScene(gameOverScene, transition: reveal)
     }
+    // stop the physics simulation
+    // and display the pause menu
     func pauseGame() {
         isPaused = true
+        // the pause menu is added to the camera
+        // because the view might have moved from
+        // the starting position, in which case
+        // adding the pause menu straight to the SKScene
+        // would put the menu nodes off screen.
+        // adding them to the camera instead
+        // guarantees they will be visible
         guard let cameraNode = camera else { return }
         cameraNode.addChild(pausedBanner)
         cameraNode.addChild(menuButton)
         cameraNode.addChild(resumeInstruction)
     }
+    // remove the pause menu
+    // and resume the physics simulation
     func resumeGame() {
         pausedBanner.removeFromParent()
         menuButton.removeFromParent()
         resumeInstruction.removeFromParent()
         isPaused = false
     }
+    // if the game is not paused and
+    // the player taps outside the pause button,
+    // call playerTouchedScreen
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        // if the game is paused, we only
+        // want to act based on touches ending
         if isPaused {
             return
         }
+        // only consider the first touch
         let touch = touches.first
         guard let firstTouch = touch else { return }
+        // since the pauseButton is a child of the camera,
+        // we need a reference to it to check if the pause
+        // button has been tapped
         guard let cameraNode = camera else { return }
         let touchLocation = firstTouch.location(in: cameraNode)
-        
+        // if the touch was not on the pause button,
+        // mark the player has vulnerable and spawn a
+        // player bullet
         if !pauseButton.contains(touchLocation) {
             playerTouchedScreen()
         }
     }
-    
+    // if the game is paused, resume the game
+    // or quit to the menu depending on whether or not
+    // the tap was in the menuButton. If the game is not
+    // paused, check if the tap up was in the pauseButton
+    // and pause the game if it was
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        // only consider the first touch up
         let touch = touches.first
         guard let firstTouch = touch else { return }
+        // since the menuButton and the pauseButton are
+        // children of the camera, we need a reference to
+        // the camera to check if the touch up was in
+        // either button
         guard let cameraNode = camera else { return }
         let touchLocation = firstTouch.location(in: cameraNode)
         if isPaused {
@@ -651,20 +756,31 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             if pauseButton.contains(touchLocation) {
                 pauseGame()
             } else {
+                // if the game is not paused and
+                // the touch is outside pauseButton,
+                // this touch up was the end of a
+                // touch to shoot, so the player has
+                // to be marked as invulnerable again
                 playerIsVulnerable = false
             }
         }
     }
-    
+    // if the game is interrupted, keep the player from dying
+    // through no fault of their own
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         playerIsVulnerable = false
     }
-    
-    
+    // before each frame is drawn, check if enemies,
+    // enemy bullets, or players bullets are out of bounds
+    // and delete them if they are. if a star is out of bounds,
+    // move it to the opposite side of the player
     override func update(_ currentTime: TimeInterval) {
         enumerateChildNodes(withName: enemyName) { (enemy, stop) in
             if self.distanceToPlayer(from: enemy) > self.maxDistanceFromPlayer {
                 enemy.removeFromParent()
+                // a constant number of enemies
+                // should be maintained, so add a new
+                // enemy whenever one is deleted
                 self.addEnemy()
             }
         }
@@ -680,37 +796,32 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         enumerateChildNodes(withName: starName) { (star, stop) in
             if self.distanceToPlayer(from: star) > self.maxDistanceFromPlayer {
-                if let starToMove = star as? SKShapeNode {
-                    self.moveStar(star: starToMove)
-                }
+                // move the out-of-bounds star to
+                // the opposite side of the player
+                self.moveStar(star: star)
             }
         }
     }
-    func playerAimVector(enemy: SKShapeNode) -> CGVector {
-        let dx = enemy.position.x - player.position.x
-        let dy = enemy.position.y - player.position.y
-        let distance = distanceToPlayer(from: enemy)
-        if let enemyVelocity = enemy.physicsBody?.velocity {
-            let aimDx = playerBulletSpeed * dx / distance + enemyVelocity.dx
-            let aimDy = playerBulletSpeed * dy / distance + enemyVelocity.dy
-            return CGVector.init(dx: aimDx, dy: aimDy)
-        } else {
-            let aimDx = playerBulletSpeed * dx / distance
-            let aimDy = playerBulletSpeed * dy / distance
-            return CGVector.init(dx: aimDx, dy: aimDy)
-        }
-    }
+    // find the distance between the player and
+    // the given node
     func distanceToPlayer(from node: SKNode) -> CGFloat {
         let dx = node.position.x - player.position.x
         let dy = node.position.y - player.position.y
         return sqrt(dx * dx + dy * dy)
     }
+    // find the angle corresponding to the given
+    // vector
     func angle(vector: CGVector) -> CGFloat {
         return atan2(vector.dy, vector.dx)
     }
+    // get the emitter that will be attached to
+    // the player
     func newPlayerTrailEmitter() -> SKEmitterNode? {
         return SKEmitterNode(fileNamed: "PlayerTrail.sks")
     }
+    // get the emmiter that will be spawned whenever
+    // the player kills an enemy to make an explosion
+    // animation
     func newEnemyDeathEmitter() -> SKEmitterNode? {
         return SKEmitterNode(fileNamed: "EnemyDeath.sks")
     }

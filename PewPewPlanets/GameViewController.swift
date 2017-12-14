@@ -16,14 +16,14 @@ class GameViewController: UIViewController {
         super.viewDidLoad()
         if let view = self.view as? SKView {
             let menuScene = MenuScene(size: view.bounds.size)
+            // we want drawing order to be based on
+            // the zPositions given to nodes, not
+            // their relationships in the tree
             view.ignoresSiblingOrder = true
-            
-            view.showsFPS = true
-            view.showsNodeCount = true
-            
             view.presentScene(menuScene)
         }
     }
+    // since this is a game, hide the status bar
     override var prefersStatusBarHidden: Bool {
         return true
     }
